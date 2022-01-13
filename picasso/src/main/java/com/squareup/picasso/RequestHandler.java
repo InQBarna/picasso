@@ -44,8 +44,8 @@ import static com.squareup.picasso.Utils.checkNotNull;
  */
 public abstract class RequestHandler {
   /**
-   * {@link Result} represents the result of a {@link #load(Picasso, Request, int, String)} call in a
-   * {@link RequestHandler}.
+   * {@link Result} represents the result of a {@link #load(Picasso, Request, int, String)} call
+   * in a {@link RequestHandler}.
    *
    * @see RequestHandler
    * @see #load(Picasso, Request, int, String)
