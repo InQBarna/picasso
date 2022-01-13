@@ -44,21 +44,27 @@ public class MediaStoreRequestHandlerTest {
 
   @Test public void decodesVideoThumbnailWithVideoMimeType() throws Exception {
     Bitmap bitmap = makeBitmap();
-    Request request =
-        new Request.Builder(MEDIA_STORE_CONTENT_1_URL, 0, ARGB_8888).resize(100, 100).build();
+    Request request = new Request.Builder(MEDIA_STORE_CONTENT_1_URL, 0, ARGB_8888)
+          .resize(100, 100)
+          .build();
     Action action = mockAction(MEDIA_STORE_CONTENT_KEY_1, request);
     MediaStoreRequestHandler requestHandler = create("video/");
-    Bitmap result = requestHandler.load(mock(Picasso.class), action.getRequest(), 0).getBitmap();
+    Bitmap result = requestHandler
+      .load(mock(Picasso.class), action.getRequest(), 0, MEDIA_STORE_CONTENT_KEY_1)
+      .getBitmap();
     assertBitmapsEqual(result, bitmap);
   }
 
   @Test public void decodesImageThumbnailWithImageMimeType() throws Exception {
     Bitmap bitmap = makeBitmap(20, 20);
-    Request request =
-        new Request.Builder(MEDIA_STORE_CONTENT_1_URL, 0, ARGB_8888).resize(100, 100).build();
+    Request request = new Request.Builder(MEDIA_STORE_CONTENT_1_URL, 0, ARGB_8888)
+          .resize(100, 100)
+          .build();
     Action action = mockAction(MEDIA_STORE_CONTENT_KEY_1, request);
     MediaStoreRequestHandler requestHandler = create("image/png");
-    Bitmap result = requestHandler.load(mock(Picasso.class), action.getRequest(), 0).getBitmap();
+    Bitmap result = requestHandler
+      .load(mock(Picasso.class), action.getRequest(), 0, MEDIA_STORE_CONTENT_KEY_1)
+      .getBitmap();
     assertBitmapsEqual(result, bitmap);
   }
 

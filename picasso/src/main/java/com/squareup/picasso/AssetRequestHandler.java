@@ -48,7 +48,7 @@ class AssetRequestHandler extends RequestHandler {
 
   @Override public Result load(@NonNull Picasso picasso,
                                @NonNull Request request,
-                               int networkPolicy) throws IOException {
+                               int networkPolicy, @NonNull String key) throws IOException {
     if (assetManager == null) {
       synchronized (lock) {
         if (assetManager == null) {

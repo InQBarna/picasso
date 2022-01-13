@@ -44,7 +44,7 @@ class NetworkRequestHandler extends RequestHandler {
 
   @Override public Result load(@NonNull Picasso picasso,
                                @NonNull Request request,
-                               int networkPolicy) throws IOException {
+                               int networkPolicy, @NonNull String key) throws IOException {
     okhttp3.Request downloaderRequest = createRequest(request, networkPolicy);
     Response response = downloader.load(downloaderRequest);
     ResponseBody body = response.body();
@@ -65,7 +65,7 @@ class NetworkRequestHandler extends RequestHandler {
       throw new ContentLengthException("Received response with 0 content-length header.");
     }
     if (loadedFrom == NETWORK && body.contentLength() > 0) {
-      picasso.downloadFinished(body.contentLength());
+      picasso.downloadFinished(key, body.contentLength());
     }
     return new Result(body.source(), loadedFrom);
   }

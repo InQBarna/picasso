@@ -47,6 +47,7 @@ import static okhttp3.Protocol.HTTP_1_1;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,7 +86,7 @@ public class NetworkRequestHandlerTest {
   @Test public void doesNotForceLocalCacheOnlyWithAirplaneModeOffAndRetryCount() throws Exception {
     responses.add(responseOf(ResponseBody.create(null, new byte[10])));
     Action action = TestUtils.mockAction(URI_KEY_1, URI_1);
-    networkHandler.load(picasso, action.getRequest(), 0);
+    networkHandler.load(picasso, action.getRequest(), 0, URI_KEY_1);
     assertThat(requests.takeFirst().cacheControl().toString()).isEmpty();
   }
 
@@ -95,7 +96,8 @@ public class NetworkRequestHandlerTest {
     BitmapHunter hunter = new BitmapHunter(picasso, dispatcher, cache, action, networkHandler);
     hunter.retryCount = 0;
     hunter.hunt();
-    assertThat(requests.takeFirst().cacheControl().toString()).isEqualTo(CacheControl.FORCE_CACHE.toString());
+    assertThat(requests.takeFirst().cacheControl().toString())
+      .isEqualTo(CacheControl.FORCE_CACHE.toString());
   }
 
   @Test public void shouldRetryTwiceWithAirplaneModeOffAndNoNetworkInfo() throws Exception {
@@ -128,8 +130,8 @@ public class NetworkRequestHandlerTest {
   @Test public void noCacheAndKnownContentLengthDispatchToStats() throws Exception {
     responses.add(responseOf(ResponseBody.create(null, new byte[10])));
     Action action = TestUtils.mockAction(URI_KEY_1, URI_1);
-    networkHandler.load(picasso, action.getRequest(), 0);
-    verify(picasso).downloadFinished(10);
+    networkHandler.load(picasso, action.getRequest(), 0, URI_KEY_1);
+    verify(picasso).downloadFinished(URI_KEY_1, 10);
   }
 
   @Test public void unknownContentLengthFromDiskThrows() throws Exception {
@@ -149,10 +151,10 @@ public class NetworkRequestHandlerTest {
         .build());
     Action action = TestUtils.mockAction(URI_KEY_1, URI_1);
     try {
-      networkHandler.load(picasso, action.getRequest(), 0);
+      networkHandler.load(picasso, action.getRequest(), 0, URI_KEY_1);
       fail();
     } catch(IOException expected) {
-      verify(picasso, never()).downloadFinished(anyInt());
+      verify(picasso, never()).downloadFinished(eq(URI_KEY_1), anyInt());
       assertTrue(closed.get());
     }
   }
@@ -163,8 +165,8 @@ public class NetworkRequestHandlerTest {
         .cacheResponse(responseOf(null))
         .build());
     Action action = TestUtils.mockAction(URI_KEY_1, URI_1);
-    networkHandler.load(picasso, action.getRequest(), 0);
-    verify(picasso, never()).downloadFinished(anyInt());
+    networkHandler.load(picasso, action.getRequest(), 0, URI_KEY_1);
+    verify(picasso, never()).downloadFinished(eq(URI_KEY_1), anyInt());
   }
 
   private static Response responseOf(ResponseBody body) {

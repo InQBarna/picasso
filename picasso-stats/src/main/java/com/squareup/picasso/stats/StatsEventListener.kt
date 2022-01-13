@@ -32,6 +32,9 @@ class StatsEventListener : EventListener {
   private var totalTransformedBitmapSize = 0L
 
   private var averageDownloadSize = 0.0
+  override fun huntStarted(key: String) {}
+  override fun huntEnded(key: String, success: Boolean, loadedFrom: Picasso.LoadedFrom) {}
+
   private var averageOriginalBitmapSize = 0.0
   private var averageTransformedBitmapSize = 0.0
 
@@ -39,21 +42,21 @@ class StatsEventListener : EventListener {
   private var originalBitmapCount = 0
   private var transformedBitmapCount = 0
 
-  override fun cacheHit() {
+  override fun cacheHit(key: String) {
     cacheHits++
   }
 
-  override fun cacheMiss() {
+  override fun cacheMiss(key: String) {
     cacheMisses++
   }
 
-  override fun downloadFinished(size: Long) {
+  override fun downloadFinished(key: String, size: Long) {
     downloadCount++
     totalDownloadSize += size
     averageDownloadSize = average(downloadCount, totalDownloadSize)
   }
 
-  override fun bitmapDecoded(bitmap: Bitmap) {
+  override fun bitmapDecoded(key: String, bitmap: Bitmap) {
     val bitmapSize = BitmapCompat.getAllocationByteCount(bitmap)
 
     originalBitmapCount++
@@ -61,7 +64,7 @@ class StatsEventListener : EventListener {
     averageOriginalBitmapSize = average(originalBitmapCount, totalOriginalBitmapSize)
   }
 
-  override fun bitmapTransformed(bitmap: Bitmap) {
+  override fun bitmapTransformed(key: String, bitmap: Bitmap) {
     val bitmapSize = BitmapCompat.getAllocationByteCount(bitmap)
 
     transformedBitmapCount++

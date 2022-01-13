@@ -15,6 +15,20 @@
 */
 package com.squareup.picasso;
 
+import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
+import static android.graphics.Bitmap.Config.ARGB_8888;
+import static android.provider.ContactsContract.Contacts.CONTENT_URI;
+import static android.provider.ContactsContract.Contacts.Photo.CONTENT_DIRECTORY;
+import static com.squareup.picasso.Picasso.LoadedFrom.MEMORY;
+import static com.squareup.picasso.Picasso.Priority;
+import static com.squareup.picasso.Utils.createKey;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,30 +40,19 @@ import android.os.IBinder;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import androidx.annotation.NonNull;
-
-import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
-import static android.graphics.Bitmap.Config.ARGB_8888;
-import static android.provider.ContactsContract.Contacts.CONTENT_URI;
-import static android.provider.ContactsContract.Contacts.Photo.CONTENT_DIRECTORY;
-import static com.squareup.picasso.Picasso.LoadedFrom.MEMORY;
-import static com.squareup.picasso.Picasso.Priority;
-import static com.squareup.picasso.Utils.createKey;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class TestUtils {
   static final Answer<Object> TRANSFORM_REQUEST_ANSWER = new Answer<Object>() {
@@ -252,7 +255,9 @@ class TestUtils {
     try {
       Bitmap defaultResult = makeBitmap();
       RequestHandler.Result result = new RequestHandler.Result(defaultResult, MEMORY);
-      when(requestHandler.load(any(Picasso.class), any(Request.class), anyInt())).thenReturn(result);
+      when(requestHandler
+        .load(any(Picasso.class), any(Request.class), anyInt(), anyString()))
+        .thenReturn(result);
       when(requestHandler.canHandleRequest(any(Request.class))).thenReturn(true);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -277,28 +282,38 @@ class TestUtils {
     Bitmap transformedBitmap = null;
     boolean closed = false;
 
-    @Override public void cacheHit() {
+    @Override public void cacheHit(@NotNull String key) {
       cacheHits++;
     }
 
-    @Override public void cacheMiss() {
+    @Override public void cacheMiss(@NotNull String key) {
       cacheMisses++;
     }
 
-    @Override public void downloadFinished(long size) {
+    @Override public void downloadFinished(@NotNull String key, long size) {
       downloadSize = size;
     }
 
-    @Override public void bitmapDecoded(@NonNull Bitmap bitmap) {
+    @Override public void bitmapDecoded(@NotNull String key, @NotNull Bitmap bitmap) {
       decodedBitmap = bitmap;
     }
 
-    @Override public void bitmapTransformed(@NonNull Bitmap bitmap) {
+    @Override public void bitmapTransformed(@NotNull String key, @NotNull Bitmap bitmap) {
       transformedBitmap = bitmap;
     }
 
     @Override public void close() {
       closed = true;
+    }
+
+    @Override
+    public void huntStarted(@NonNull String key) {
+
+    }
+
+    @Override
+    public void huntEnded(@NotNull String key, boolean success, @NotNull Picasso.LoadedFrom loadedFrom) {
+
     }
   }
 

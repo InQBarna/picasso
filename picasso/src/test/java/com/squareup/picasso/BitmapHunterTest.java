@@ -157,7 +157,7 @@ public class BitmapHunterTest {
 
     Bitmap result = hunter.hunt();
     verify(cache).get(URI_KEY_1);
-    verify(hunter.requestHandler).load(picasso, action.getRequest(), 0);
+    verify(hunter.requestHandler).load(picasso, action.getRequest(), 0, URI_KEY_1);
     assertThat(result).isEqualTo(bitmap);
   }
 
@@ -169,7 +169,10 @@ public class BitmapHunterTest {
 
     Bitmap result = hunter.hunt();
     verify(cache).get(URI_KEY_1);
-    verify(hunter.requestHandler, never()).load(picasso, action.getRequest(), 0);
+    verify(
+      hunter.requestHandler,
+      never()
+    ).load(picasso, action.getRequest(), 0, URI_KEY_1);
     assertThat(result).isEqualTo(bitmap);
   }
 
@@ -1070,7 +1073,7 @@ public class BitmapHunterTest {
       return true;
     }
 
-    @Override public Result load(@NonNull Picasso picasso, @NonNull Request request, int networkPolicy) throws IOException {
+    @Override public Result load(@NonNull Picasso picasso, @NonNull Request request, int networkPolicy, @NonNull String key) throws IOException {
       if (exception != null) {
         throw exception;
       }
@@ -1095,7 +1098,7 @@ public class BitmapHunterTest {
       super(null, null);
     }
 
-    @Override public Result load(@NonNull Picasso picasso, @NonNull Request request, int networkPolicy) throws IOException {
+    @Override public Result load(@NonNull Picasso picasso, @NonNull Request request, int networkPolicy, @NonNull String key) throws IOException {
       throw new OutOfMemoryError();
     }
   }
@@ -1105,7 +1108,7 @@ public class BitmapHunterTest {
         return CUSTOM_URI.getScheme().equals(data.uri.getScheme());
     }
 
-    @Override public Result load(@NonNull Picasso picasso, @NonNull Request request, int networkPolicy) {
+    @Override public Result load(@NonNull Picasso picasso, @NonNull Request request, int networkPolicy, @NonNull String key) {
       return new Result(bitmap, MEMORY);
     }
   }

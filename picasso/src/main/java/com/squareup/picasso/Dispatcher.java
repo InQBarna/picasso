@@ -356,6 +356,7 @@ class Dispatcher {
       cache.set(hunter.getKey(), hunter.getResult());
     }
     hunterMap.remove(hunter.getKey());
+    hunter.getPicasso().endHunt(true, hunter);
     batch(hunter);
     if (hunter.getPicasso().loggingEnabled) {
       log(OWNER_DISPATCHER, VERB_BATCHED, getLogIdsForHunter(hunter), "for completion");
@@ -375,6 +376,7 @@ class Dispatcher {
           "for error" + (willReplay ? " (will replay)" : ""));
     }
     hunterMap.remove(hunter.getKey());
+    hunter.getPicasso().endHunt(false, hunter);
     batch(hunter);
   }
 

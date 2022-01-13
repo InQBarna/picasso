@@ -69,7 +69,7 @@ class ContactsPhotoRequestHandler extends RequestHandler {
 
   @Override public Result load(@NonNull Picasso picasso,
                                @NonNull Request request,
-                               int networkPolicy) throws IOException {
+                               int networkPolicy, @NonNull String key) throws IOException {
     InputStream is = getInputStream(request);
     if (is == null) {
       return null;

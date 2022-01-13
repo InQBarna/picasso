@@ -19,10 +19,12 @@ import android.graphics.Bitmap
 import java.io.Closeable
 
 interface EventListener : Closeable {
-  fun cacheHit()
-  fun cacheMiss()
-  fun downloadFinished(size: Long)
-  fun bitmapDecoded(bitmap: Bitmap)
-  fun bitmapTransformed(bitmap: Bitmap)
+  fun cacheHit(key: String)
+  fun cacheMiss(key: String)
+  fun downloadFinished(key: String, size: Long)
+  fun bitmapDecoded(key: String, bitmap: Bitmap)
+  fun bitmapTransformed(key: String, bitmap: Bitmap)
   override fun close() = Unit
+  fun huntStarted(key: String)
+  fun huntEnded(key: String, success: Boolean, loadedFrom: Picasso.LoadedFrom)
 }

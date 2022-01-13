@@ -42,6 +42,7 @@ import static androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90;
 import static androidx.exifinterface.media.ExifInterface.ORIENTATION_TRANSPOSE;
 import static androidx.exifinterface.media.ExifInterface.ORIENTATION_TRANSVERSE;
 import static com.squareup.picasso.MemoryPolicy.shouldReadFromMemoryCache;
+import static com.squareup.picasso.Picasso.LoadedFrom.DISK;
 import static com.squareup.picasso.Picasso.LoadedFrom.MEMORY;
 import static com.squareup.picasso.Picasso.Priority;
 import static com.squareup.picasso.Picasso.Priority.LOW;
@@ -77,7 +78,7 @@ class BitmapHunter implements Runnable {
 
     @Override public Result load(@NonNull Picasso picasso,
                                  @NonNull Request request,
-                                 int networkPolicy) throws IOException {
+                                 int networkPolicy, @NonNull String key) throws IOException {
       throw new IllegalStateException("Unrecognized type of request: " + request);
     }
   };
@@ -170,6 +171,7 @@ class BitmapHunter implements Runnable {
     try {
       updateThreadName(data);
 
+      picasso.startHunt(this);
       if (picasso.loggingEnabled) {
         log(OWNER_HUNTER, VERB_EXECUTING, getLogIdsForHunter(this));
       }
@@ -206,7 +208,7 @@ class BitmapHunter implements Runnable {
     if (shouldReadFromMemoryCache(memoryPolicy)) {
       bitmap = cache.get(key);
       if (bitmap != null) {
-        picasso.cacheHit();
+        picasso.cacheHit(key);
         loadedFrom = MEMORY;
         if (picasso.loggingEnabled) {
           log(OWNER_HUNTER, VERB_DECODED, data.logId(), "from cache");
@@ -216,9 +218,16 @@ class BitmapHunter implements Runnable {
     }
 
     networkPolicy = retryCount == 0 ? NetworkPolicy.OFFLINE.index : networkPolicy;
-    RequestHandler.Result result = requestHandler.load(picasso, data, networkPolicy);
+    RequestHandler.Result result = requestHandler.load(picasso, data, networkPolicy, key);
     if (result != null) {
       loadedFrom = result.getLoadedFrom();
+
+      if (loadedFrom == DISK) {
+        picasso.cacheHit(key);
+      } else {
+        picasso.cacheMiss(key);
+      }
+
       exifOrientation = result.getExifOrientation();
       bitmap = result.getBitmap();
 
@@ -241,7 +250,7 @@ class BitmapHunter implements Runnable {
       if (picasso.loggingEnabled) {
         log(OWNER_HUNTER, VERB_DECODED, data.logId());
       }
-      picasso.bitmapDecoded(bitmap);
+      picasso.bitmapDecoded(key, bitmap);
       if (data.needsTransformation() || exifOrientation != 0) {
         synchronized (DECODE_LOCK) {
           if (data.needsMatrixTransform() || exifOrientation != 0) {
@@ -258,7 +267,7 @@ class BitmapHunter implements Runnable {
           }
         }
         if (bitmap != null) {
-          picasso.bitmapTransformed(bitmap);
+          picasso.bitmapTransformed(key, bitmap);
         }
       }
     }

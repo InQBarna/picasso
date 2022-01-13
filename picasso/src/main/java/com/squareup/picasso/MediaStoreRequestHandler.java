@@ -57,7 +57,7 @@ class MediaStoreRequestHandler extends ContentStreamRequestHandler {
 
   @Override public Result load(@NonNull Picasso picasso,
                                @NonNull Request request,
-                               int networkPolicy) throws IOException {
+                               int networkPolicy, @NonNull String key) throws IOException {
     ContentResolver contentResolver = context.getContentResolver();
     int exifOrientation = getExifOrientation(contentResolver, request.uri);
 

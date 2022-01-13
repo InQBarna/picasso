@@ -65,6 +65,7 @@ import static com.squareup.picasso.Utils.log;
  */
 public class Picasso {
 
+
   /** Callbacks for Picasso events. */
   public interface Listener {
     /**
@@ -501,50 +502,66 @@ public class Picasso {
   Bitmap quickMemoryCacheCheck(String key) {
     Bitmap cached = cache.get(key);
     if (cached != null) {
-      cacheHit();
+      cacheHit(key);
     } else {
-      cacheMiss();
+      cacheMiss(key);
     }
     return cached;
   }
 
-  void cacheHit() {
+  void cacheHit(String key) {
     int numListeners = eventListeners.size();
     for (int i = 0; i < numListeners; i++) {
       EventListener listener = eventListeners.get(i);
-      listener.cacheHit();
+      listener.cacheHit(key);
     }
   }
 
-  void cacheMiss() {
+  void cacheMiss(String key) {
     int numListeners = eventListeners.size();
     for (int i = 0; i < numListeners; i++) {
       EventListener listener = eventListeners.get(i);
-      listener.cacheMiss();
+      listener.cacheMiss(key);
     }
   }
 
-  void downloadFinished(long size) {
+  public void startHunt(BitmapHunter hunter) {
     int numListeners = eventListeners.size();
     for (int i = 0; i < numListeners; i++) {
       EventListener listener = eventListeners.get(i);
-      listener.downloadFinished(size);
+      listener.huntStarted(hunter.key);
     }
   }
 
-  void bitmapDecoded(@NonNull Bitmap bitmap) {
+  public void endHunt(boolean success, BitmapHunter hunter) {
     int numListeners = eventListeners.size();
     for (int i = 0; i < numListeners; i++) {
       EventListener listener = eventListeners.get(i);
-      listener.bitmapDecoded(bitmap);
+      listener.huntEnded(hunter.key, success, hunter.loadedFrom);
     }
   }
 
-  void bitmapTransformed(@NonNull Bitmap bitmap) {
+  void downloadFinished(String key, long size) {
     int numListeners = eventListeners.size();
     for (int i = 0; i < numListeners; i++) {
       EventListener listener = eventListeners.get(i);
-      listener.bitmapTransformed(bitmap);
+      listener.downloadFinished(key, size);
+    }
+  }
+
+  void bitmapDecoded(String key, @NonNull Bitmap bitmap) {
+    int numListeners = eventListeners.size();
+    for (int i = 0; i < numListeners; i++) {
+      EventListener listener = eventListeners.get(i);
+      listener.bitmapDecoded(key, bitmap);
+    }
+  }
+
+  void bitmapTransformed(String key, @NonNull Bitmap bitmap) {
+    int numListeners = eventListeners.size();
+    for (int i = 0; i < numListeners; i++) {
+      EventListener listener = eventListeners.get(i);
+      listener.bitmapTransformed(key, bitmap);
     }
   }
 

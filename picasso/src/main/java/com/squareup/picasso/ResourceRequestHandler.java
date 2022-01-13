@@ -43,7 +43,7 @@ class ResourceRequestHandler extends RequestHandler {
 
   @Override public Result load(@NonNull Picasso picasso,
                                @NonNull Request request,
-                               int networkPolicy) throws IOException {
+                               int networkPolicy, @NonNull String key) throws IOException {
     Resources res = Utils.getResources(context, request);
     int id = Utils.getResourceId(res, request);
     return new Result(decodeResource(res, id, request), DISK);
